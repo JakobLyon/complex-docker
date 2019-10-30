@@ -1,0 +1,28 @@
+sudo: required
+services:
+  - docker
+
+# Setup images for testing
+before_install:
+  - docker build -t jakoblyon/react-test -f ./client/Dockerfile.dev ./client
+
+# Execute tests on test-images
+script:
+  - docker run -e CI=true jakoblyon/react-test npm run test -- --coverage
+
+after_success:
+  # Setup production images
+  - docker build -t jakoblyon/complex-client ./client
+  - docker build -t jakoblyon/complex-nginx ./nginx
+  - docker build -t jakoblyon/complex-server ./server
+  - docker build -t jakoblyon/complex-worker ./worker
+  # Login to Docker CLI
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+  # Push production images to Docker Hub
+  - docker push jakoblyon/complex-client
+  - docker push jakoblyon/complex-nginx 
+  - docker push jakoblyon/complex-server
+  - docker push jakoblyon/complex-worker
+
+deploy:
+  provider: elasticbeanstalk
