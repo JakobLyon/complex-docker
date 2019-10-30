@@ -23,6 +23,3 @@ after_success:
   - docker push jakoblyon/complex-nginx 
   - docker push jakoblyon/complex-server
   - docker push jakoblyon/complex-worker
-
-deploy:
-  provider: elasticbeanstalk
